@@ -1,6 +1,8 @@
 import pprint
 import requests
 import json
+import os
+import time
 import urllib.request
 from instagram.client import InstagramAPI
 
@@ -40,6 +42,20 @@ picturesQueryResponseJson = picturesQueryResponse.json()
 user = picturesQueryResponse.json()['data']['user']
 posts = user['edge_owner_to_timeline_media']['edges']
 pp.pprint(posts)
+
+path = os.getcwd()
+resultPath = f"{path}\\results"
+profileResultPath = f"{resultPath}\\{profileName}"
+newScrappingPath = f"{profileResultPath}\\{time.strftime('%Y.%m.%d-%H%M%S')}"
+
+if not os.path.exists(resultPath):
+  os.mkdir(resultPath)
+
+if not os.path.exists(profileResultPath):
+  os.mkdir(profileResultPath)
+
+if not os.path.exists(newScrappingPath):
+  os.mkdir(newScrappingPath)
 
 for index, post in enumerate(posts):
   postNode = post['node']
