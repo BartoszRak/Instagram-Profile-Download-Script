@@ -1,6 +1,7 @@
 import pprint
 import requests
 import json
+import urllib.request
 from instagram.client import InstagramAPI
 
 # init
@@ -34,5 +35,13 @@ graphqlQueryParams = {
 }
 
 picturesQueryResponse = requests.get(graphqlUrl, params=graphqlQueryParams)
+picturesQueryResponseJson = picturesQueryResponse.json()
 
-pp.pprint(picturesQueryResponse.json())
+user = picturesQueryResponse.json()['data']['user']
+posts = user['edge_owner_to_timeline_media']['edges']
+pp.pprint(posts)
+
+for index, post in enumerate(posts):
+  postNode = post['node']
+  pp.pprint(postNode['display_url'])
+  # urllib.request.urlretrieve(postNode['display_url'], f"{postNode['id']}.jpg")
