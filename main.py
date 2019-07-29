@@ -25,7 +25,7 @@ id = textStartedWithId[:textStartedWithId.find('"')]
 graphqlUrl = f"{instagramBaseUrl}graphql/query/"
 graphqlVariables = {
   'id': id,
-  'first': 12,
+  'first': 100,
   'after': '',
 }
 graphqlVariablesJson = json.dumps(graphqlVariables)
@@ -41,7 +41,6 @@ picturesQueryResponseJson = picturesQueryResponse.json()
 
 user = picturesQueryResponse.json()['data']['user']
 posts = user['edge_owner_to_timeline_media']['edges']
-pp.pprint(posts)
 
 path = os.getcwd()
 resultPath = f"{path}\\results"
@@ -57,7 +56,9 @@ if not os.path.exists(profileResultPath):
 if not os.path.exists(newScrappingPath):
   os.mkdir(newScrappingPath)
 
+pp.pprint(f"### {len(posts)}")
+
 for index, post in enumerate(posts):
   postNode = post['node']
-  pp.pprint(postNode['display_url'])
-  # urllib.request.urlretrieve(postNode['display_url'], f"{postNode['id']}.jpg")
+  pp.pprint(f"{index}. {postNode['display_url']}")
+  urllib.request.urlretrieve(postNode['display_url'], f"{newScrappingPath}\\{postNode['id']}.jpg")
