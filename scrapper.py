@@ -13,7 +13,7 @@ pp = pprint.PrettyPrinter(indent=4)
 class Scrapper:
   __posts = []
   __tagged_posts = []
-  __paths = {}
+  __paths = None
 
   def __init__(self, user_setup):
     self.__user_setup = user_setup
@@ -28,19 +28,22 @@ class Scrapper:
     relative_scrapping_path = f"{relative_user_path}/{time.strftime('%Y.%m.%d-%H%M%S')}"
     relative_posts_path = f"{relative_scrapping_path}/posts"
     relative_tagged_posts_path = f"{relative_scrapping_path}/tagged-posts"
+    relative_fetched_data_path = f"{relative_scrapping_path}/FETCHED_DATA"
 
     results_path = get_absolute_path(relative_base_path)
     user_path = get_absolute_path(relative_user_path)
     scrapping_path = get_absolute_path(relative_scrapping_path)
     posts_path = get_absolute_path(relative_posts_path)
     tagged_posts_path = get_absolute_path(relative_tagged_posts_path)
+    fetched_data_path = get_absolute_path(relative_fetched_data_path)
 
     paths = {
-      results_path,
-      user_path,
-      scrapping_path,
-      posts_path,
-      tagged_posts_path,
+      'results_path': results_path,
+      'user_pathu': user_path,
+      'scrapping_path': scrapping_path,
+      'posts_path': posts_path,
+      'tagged_posts_path': tagged_posts_path,
+      'fetched_data_path': fetched_data_path,
     }
     self.__paths = paths
     return paths
@@ -76,7 +79,26 @@ class Scrapper:
     }
 
   def save(self):
-    self.prepare_directories()
+    if self.__paths == None:
+      self.prepare_directories()
+
+  def save_fetched(self):
+    pp.pprint(f"==> Saving fetched data...")
+    if self.__paths == None:
+      self.prepare_directories()
+    counter = 0
+    if len(self.__posts) > 0:
+      file = open(f"{self.__paths.get('fetched_data_path')}\\posts.json", 'w+')
+      json.dump(self.__posts, file)
+      file.close()
+      counter += 1
+    if len(self.__tagged_posts) > 0:
+      file = open(f"{self.__paths.get('fetched_data_path')}\\tagged-posts.json", 'w+')
+      json.dump(self.__tagged_posts, file)
+      file.close()
+      counter += 1
+    pp.pprint(f"# RESULT: {counter} json files with data saved.")
+    
 
   def fetch(self):
     if self.user_setup.posts == True:
