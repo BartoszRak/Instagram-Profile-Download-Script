@@ -3,6 +3,7 @@ import pprint
 import json
 import requests
 import time
+import urllib.request
 
 # modules
 from queries import QUERIES
@@ -78,9 +79,47 @@ class Scrapper:
       'count': count,
     }
 
+  def save_item(self, item, index, save_path):
+    typename = item.get('__typename')
+    save_name = f"Resource-{index}"
+
+    if typename == "GraphImage":
+      mime = "jpg"
+      resource = item.get('display_url', None)
+      if resource == None:
+        return False
+      urllib.request.urlretrieve(
+          resource, f"{save_path}\\{save_name}.{mime}")
+
+    if typename == 'GraphVideo':
+      mime = "mp4" if item.get('video_url', False) else 'jpg'
+      resource = item.get('video_url', item.get('display_url', {}))
+      if resource == None:
+        return False
+      urllib.request.urlretrieve(
+          resource, f"{save_path}\\{save_name}.{mime}")
+      return True
+    
+
   def save(self):
     if self.__paths == None:
       self.prepare_directories()
+    overall_counter = 0
+    total_items = len(self.__posts) + len(self.__tagged_posts)
+    pp.pprint(f"==> Saving all data...")
+    if len(self.__posts) > 0:
+      for index, post in enumerate(self.__posts):
+        overall_counter += 1
+        pp.pprint(f"- {round(overall_counter/total_items * 100, 2)}% - {overall_counter}/{total_items} items saved.")
+        self.save_item(post,  index + 1, self.__paths.get('posts_path'))
+
+    if len(self.__tagged_posts) > 0:
+      for index, tagged_post in enumerate(self.__tagged_posts):
+        overall_counter += 1
+        pp.pprint(f"- {round(overall_counter/total_items * 100, 2)}% - {overall_counter}/{total_items} items saved.")
+        self.save_item(tagged_post, index + 1, self.__paths.get('tagged_posts_path'))
+
+    pp.pprint(f"# RESULT: {overall_counter} images and/or videos saved.")
 
   def save_fetched(self):
     pp.pprint(f"==> Saving fetched data...")
