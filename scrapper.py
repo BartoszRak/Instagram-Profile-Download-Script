@@ -79,9 +79,9 @@ class Scrapper:
       'count': count,
     }
 
-  def save_item(self, item, index, save_path):
+  def save_item(self, item, version, save_path):
     typename = item.get('__typename')
-    save_name = f"Resource-{index}"
+    save_name = f"Resource-{version}"
 
     if typename == "GraphImage":
       mime = "jpg"
@@ -99,7 +99,28 @@ class Scrapper:
       urllib.request.urlretrieve(
           resource, f"{save_path}\\{save_name}.{mime}")
       return True
-    
+
+    if typename == 'GraphSidecar':
+      media = item.get('edge_sidecar_to_children', None)
+      if media == None:
+        # handle sidecar that requires fetching
+        shortcode = item.get('shortcode')
+        response = requests.get('https://www.instagram.com/graphql/query/', params={
+          'query_hash': QUERIES.get('get_single_post').get('hash'),
+          'variables': json.dumps({
+            'shortcode': shortcode,
+          })
+        })
+        parsed_response = response.json()
+        sidecar = parsed_response.get('data', {}).get('shortcode_media', None)
+        if sidecar == None:
+          return False
+        media = sidecar.get('edge_sidecar_to_children', None)
+      nodes = media.get('edges', [])
+      items = list(map(lambda node: node.get('node'), nodes))
+      for index, sidecar_item in enumerate(items):
+        self.save_item(sidecar_item, f"{version}.{index + 1}", save_path)
+      return True
 
   def save(self):
     if self.__paths == None:

@@ -7,4 +7,8 @@ QUERIES = {
     'hash': 'ff260833edf142911047af6024eb634a',
     'data_key': 'edge_user_to_photos_of_you',
   },
+  'get_single_post': {
+    'hash': '477b65a610463740ccdb83135b2014db',
+    'data_key': None,
+  }
 }
