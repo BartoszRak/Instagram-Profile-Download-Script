@@ -4,11 +4,11 @@ import json
 import os
 import time
 import urllib.request
+import decimal
 
 from instagram.client import InstagramAPI
 
 # utils
-
 
 def get_id_from_profile_html(response):
     search = 'profilePage_'
@@ -59,15 +59,17 @@ def scrap_profile(endCursor=''):
     user = pictures_get_response_json['data']['user']
     page_info = user['edge_owner_to_timeline_media']['page_info']
     posts = user['edge_owner_to_timeline_media']['edges']
+    total_posts_number = user['edge_owner_to_timeline_media']['count']
 
     new_scrapping_path = check_directories()
 
     for index, post in enumerate(posts):
+        global COUNTER
+        COUNTER = COUNTER + 1
         post_node = post['node']
+        pp.pprint(f"# {round(COUNTER/total_posts_number * 100, 2)}% - {COUNTER}/{total_posts_number} Proceeded")
         urllib.request.urlretrieve(
             post_node['display_url'], f"{new_scrapping_path}\\{post_node['id']}.jpg")
-
-    pp.pprint(f"# {len(posts)} pictures have been saved.")
 
     if page_info['has_next_page']:
         scrap_profile(page_info['end_cursor'])
@@ -79,6 +81,7 @@ pp = pprint.PrettyPrinter(indent=4)
 # main
 INSTAGRAM_BASE_URL = 'https://www.instagram.com/'
 PROFILE_NAME = input('Instagram profile NAME: ')
+COUNTER = 0
 profile_url = f"{INSTAGRAM_BASE_URL}{PROFILE_NAME}/"
 pp.pprint(profile_url)
 html_response = requests.get(profile_url)
