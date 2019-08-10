@@ -13,7 +13,7 @@ def input_true_or_false(message):
   pp.pprint('Only "y" or "n" are available as answers')
   return input_true_or_false(message)
 
-def get_relative_path(user_path):
+def get_absolute_path(user_path):
   prepared_user_path = user_path.replace('/', '\\')
   path = os.getcwd()
   result_path = f"{path}\\{prepared_user_path}"

@@ -6,7 +6,7 @@ import time
 
 # modules
 from queries import QUERIES
-from utils import get_relative_path
+from utils import get_absolute_path
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -23,11 +23,18 @@ class Scrapper:
     return self.__user_setup
 
   def prepare_directories(self):
-    results_path = get_relative_path('results')
-    user_path = get_relative_path(f"results/{self.user_setup.profile_name}")
-    scrapping_path = get_relative_path(f"results/{self.user_setup.profile_name}/{time.strftime('%Y.%m.%d-%H%M%S')}")
-    posts_path = get_relative_path(f"results/{self.user_setup.profile_name}/{time.strftime('%Y.%m.%d-%H%M%S')}/posts")
-    tagged_posts_path = get_relative_path(f"results/{self.user_setup.profile_name}/{time.strftime('%Y.%m.%d-%H%M%S')}/tagged-posts")
+    relative_base_path = 'results'
+    relative_user_path = f"{relative_base_path}/{self.user_setup.profile_name}"
+    relative_scrapping_path = f"{relative_user_path}/{time.strftime('%Y.%m.%d-%H%M%S')}"
+    relative_posts_path = f"{relative_scrapping_path}/posts"
+    relative_tagged_posts_path = f"{relative_scrapping_path}/tagged-posts"
+
+    results_path = get_absolute_path(relative_base_path)
+    user_path = get_absolute_path(relative_user_path)
+    scrapping_path = get_absolute_path(relative_scrapping_path)
+    posts_path = get_absolute_path(relative_posts_path)
+    tagged_posts_path = get_absolute_path(relative_tagged_posts_path)
+
     paths = {
       results_path,
       user_path,
