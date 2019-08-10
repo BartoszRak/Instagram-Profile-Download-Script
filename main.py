@@ -10,6 +10,7 @@ from instagram.client import InstagramAPI
 
 # utils
 
+
 def get_id_from_profile_html(response):
     search = 'profilePage_'
     profile_text = response.text
@@ -51,6 +52,31 @@ def get_query_params(cursor=''):
     }
 
 
+def save_node(node, dotVersion=None):
+    scrapping_path = check_directories()
+    version = f".{dotVersion}" if dotVersion is not None else ''
+    save_name = f"Resource{TOTAL - COUNTER + 1}{version}"
+    typename = node['__typename']
+    mime = ''
+    resource_url = ''
+
+    if typename == "GraphImage":
+        mime = "jpg"
+        resource_url = 'display_url'
+        urllib.request.urlretrieve(
+            node[resource_url], f"{scrapping_path}\\{save_name}.{mime}")
+
+    if typename == 'GraphVideo':
+        mime = "mp4"
+        resource_url = 'video_url'
+        urllib.request.urlretrieve(
+            node[resource_url], f"{scrapping_path}\\{save_name}.{mime}")
+
+    if typename == 'GraphSidecar':
+        for index, post in enumerate(node['edge_sidecar_to_children']['edges']):
+            save_node(post['node'], index + 1)
+
+
 def scrap_profile(endCursor=''):
     graphql_url = f"{INSTAGRAM_BASE_URL}graphql/query/"
     query_params = get_query_params(endCursor)
@@ -59,17 +85,16 @@ def scrap_profile(endCursor=''):
     user = pictures_get_response_json['data']['user']
     page_info = user['edge_owner_to_timeline_media']['page_info']
     posts = user['edge_owner_to_timeline_media']['edges']
-    total_posts_number = user['edge_owner_to_timeline_media']['count']
-
-    new_scrapping_path = check_directories()
+    global TOTAL
+    TOTAL = user['edge_owner_to_timeline_media']['count']
 
     for index, post in enumerate(posts):
         global COUNTER
         COUNTER = COUNTER + 1
         post_node = post['node']
-        pp.pprint(f"# {round(COUNTER/total_posts_number * 100, 2)}% - {COUNTER}/{total_posts_number} Proceeded")
-        urllib.request.urlretrieve(
-            post_node['display_url'], f"{new_scrapping_path}\\{post_node['id']}.jpg")
+        save_node(post_node)
+        pp.pprint(
+            f"{round(COUNTER/TOTAL * 100, 2)}% - Item {COUNTER}/{TOTAL} saved.")
 
     if page_info['has_next_page']:
         scrap_profile(page_info['end_cursor'])
@@ -82,6 +107,7 @@ pp = pprint.PrettyPrinter(indent=4)
 INSTAGRAM_BASE_URL = 'https://www.instagram.com/'
 PROFILE_NAME = input('Instagram profile NAME: ')
 COUNTER = 0
+TOTAL = 0
 profile_url = f"{INSTAGRAM_BASE_URL}{PROFILE_NAME}/"
 pp.pprint(profile_url)
 html_response = requests.get(profile_url)
@@ -91,7 +117,7 @@ get_time = time.strftime('%Y.%m.%d-%H%M%S')
 
 try:
     scrap_profile()
-except:
-    pp.pprint('[ERROR] Scrapping failed.')
+except Exception as exc:
+    pp.pprint(f"[ERROR] Scrapping failed.{str(exc)}")
 
 pp.pprint('[SUCCESS] Scrapping finished.')
