@@ -68,26 +68,25 @@ def save_node(node, save_path, dotVersion=None):
     mime = ''
     resource_url = ''
 
-    if typename == "GraphImage":
+    if (typename == "GraphImage" or (typename == 'GraphVideo' and node.get('edge_sidecar_to_children') == None)):
         mime = "jpg"
         resource_url = 'display_url'
         urllib.request.urlretrieve(
             node[resource_url], f"{save_path}\\{save_name}.{mime}")
+        return
 
     if typename == 'GraphVideo':
         mime = "mp4"
         resource_url = 'video_url'
         urllib.request.urlretrieve(
             node[resource_url], f"{save_path}\\{save_name}.{mime}")
+        return
 
     if typename == 'GraphSidecar':
         sidecar = node.get('edge_sidecar_to_children')
         if sidecar == None:
             mime = 'jpg'
             resource_url = 'display_url'
-            if node['is_video'] == True:
-                mime = 'mp4'
-                resource_url = 'video_url'
             urllib.request.urlretrieve(
                 node[resource_url], f"{save_path}\\{save_name}.{mime}")
             return
