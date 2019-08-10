@@ -1,4 +1,5 @@
 # libraries
+import os
 import pprint
 
 def input_true_or_false(message):
@@ -11,3 +12,11 @@ def input_true_or_false(message):
     return False
   pp.pprint('Only "y" or "n" are available as answers')
   return input_true_or_false(message)
+
+def get_relative_path(user_path):
+  prepared_user_path = user_path.replace('/', '\\')
+  path = os.getcwd()
+  result_path = f"{path}\\{prepared_user_path}"
+  if not os.path.exists(result_path):
+    os.mkdir(result_path)
+  return result_path

@@ -2,16 +2,18 @@
 import pprint
 import json
 import requests
+import time
 
 # modules
 from queries import QUERIES
+from utils import get_relative_path
 
 pp = pprint.PrettyPrinter(indent=4)
 
 class Scrapper:
   __posts = []
   __tagged_posts = []
-
+  __paths = {}
 
   def __init__(self, user_setup):
     self.__user_setup = user_setup
@@ -19,6 +21,22 @@ class Scrapper:
   @property
   def user_setup(self):
     return self.__user_setup
+
+  def prepare_directories(self):
+    results_path = get_relative_path('results')
+    user_path = get_relative_path(f"results/{self.user_setup.profile_name}")
+    scrapping_path = get_relative_path(f"results/{self.user_setup.profile_name}/{time.strftime('%Y.%m.%d-%H%M%S')}")
+    posts_path = get_relative_path(f"results/{self.user_setup.profile_name}/{time.strftime('%Y.%m.%d-%H%M%S')}/posts")
+    tagged_posts_path = get_relative_path(f"results/{self.user_setup.profile_name}/{time.strftime('%Y.%m.%d-%H%M%S')}/tagged-posts")
+    paths = {
+      results_path,
+      user_path,
+      scrapping_path,
+      posts_path,
+      tagged_posts_path,
+    }
+    self.__paths = paths
+    return paths
 
   def get_query_params(self, query_hash, cursor=None):
     variables = {
@@ -50,13 +68,16 @@ class Scrapper:
       'count': count,
     }
 
+  def save(self):
+    self.prepare_directories()
+
   def fetch(self):
     if self.user_setup.posts == True:
       self.fetch_posts(0)
-      pp.pprint(f"# RESULT: {len(self.__posts)} posts saved.")
+      pp.pprint(f"# RESULT: {len(self.__posts)} posts fetched.")
     if self.user_setup.tagged_posts == True:
       self.fetch_tagged_posts(0)
-      pp.pprint(f"# RESULT: {len(self.__tagged_posts)} tagged posts saved.")
+      pp.pprint(f"# RESULT: {len(self.__tagged_posts)} tagged posts fetched.")
 
   def fetch_posts(self, counter=None, cursor=None):
     new_counter = counter + 1
