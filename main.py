@@ -11,7 +11,9 @@ pp = pprint.PrettyPrinter(indent=4)
 
 # main
 setup = UserSetup()
+pp.pprint('[CONFIG]')
 setup.load_by_user_input()
 
 scrapper = Scrapper(setup)
+pp.pprint('[SCRAPPER]')
 scrapper.fetch()
