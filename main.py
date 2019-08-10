@@ -14,4 +14,4 @@ setup = UserSetup()
 setup.load_by_user_input()
 
 scrapper = Scrapper(setup)
-scrapper.start()
+scrapper.fetch()
