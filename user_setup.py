@@ -9,6 +9,7 @@ class UserSetup:
   __profile_id = None
   __posts = None
   __tagged_posts = None
+  __prevent_reverse_search = None
 
   def get_id_from_profile_html(self, response):
     search = 'profilePage_'
@@ -21,6 +22,7 @@ class UserSetup:
     self.__profile_name = input('1. Instagram profile name?: ')
     self.__posts = input_true_or_false('2. Do you want posts to be downloaded? [y/n]: ')
     self.__tagged_posts = input_true_or_false('3. Do you want tagged posts to be downloaded? [y/n]: ')
+    self.__prevent_reverse_search = input_true_or_false('4. Do you want to save images with reverse search prevention? [y/n]: ')
     html = requests.get(f"https://www.instagram.com/{self.profile_name}")
     self.__profile_id = self.get_id_from_profile_html(html)
 
@@ -40,3 +42,7 @@ class UserSetup:
   @property
   def tagged_posts(self):
     return self.__tagged_posts
+
+  @property
+  def prevent_reverse_search(self):
+    return self.__prevent_reverse_search

@@ -4,10 +4,11 @@ import json
 import requests
 import time
 import urllib.request
+import cv2
 
 # modules
 from queries import QUERIES
-from utils import get_absolute_path
+from utils import get_absolute_path, get_image_from_url
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -78,6 +79,14 @@ class Scrapper:
       'cursor': cursor,
       'count': count,
     }
+  
+  def save_resource(self, url, save_path, mime):
+    if self.user_setup.prevent_reverse_search == True and mime == 'jpg':
+      image = get_image_from_url(url)
+      horizontal_image = cv2.flip(image, 1)
+      cv2.imwrite(save_path, horizontal_image)
+      return
+    urllib.request.urlretrieve(url, save_path)
 
   def save_item(self, item, version, save_path):
     typename = item.get('__typename')
@@ -88,16 +97,15 @@ class Scrapper:
       resource = item.get('display_url', None)
       if resource == None:
         return False
-      urllib.request.urlretrieve(
-          resource, f"{save_path}\\{save_name}.{mime}")
+      self.save_resource(resource, f"{save_path}\\{save_name}.{mime}", mime)
+      return True
 
     if typename == 'GraphVideo':
       mime = "mp4" if item.get('video_url', False) else 'jpg'
       resource = item.get('video_url', item.get('display_url', {}))
       if resource == None:
         return False
-      urllib.request.urlretrieve(
-          resource, f"{save_path}\\{save_name}.{mime}")
+      self.save_resource(resource, f"{save_path}\\{save_name}.{mime}", mime)
       return True
 
     if typename == 'GraphSidecar':
