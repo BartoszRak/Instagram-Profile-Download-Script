@@ -5,6 +5,7 @@ import requests
 import time
 import urllib.request
 import cv2
+import traceback
 
 # modules
 from queries import QUERIES
@@ -80,13 +81,22 @@ class Scrapper:
       'count': count,
     }
   
-  def save_resource(self, url, save_path, mime):
-    if self.user_setup.prevent_reverse_search == True and mime == 'jpg':
-      image = get_image_from_url(url)
-      horizontal_image = cv2.flip(image, 1)
-      cv2.imwrite(save_path, horizontal_image)
-      return
-    urllib.request.urlretrieve(url, save_path)
+  def save_resource(self, url, save_path, mime, iteration=1):
+    try:
+      if self.user_setup.prevent_reverse_search == True and mime == 'jpg':
+        image = get_image_from_url(url)
+        horizontal_image = cv2.flip(image, 1)
+        cv2.imwrite(save_path, horizontal_image)
+        return
+      urllib.request.urlretrieve(url, save_path)
+    except Exception:
+      pp.pprint('(!!!) ERROR occured.')
+      traceback.print_exc()
+      if (iteration <= 4):
+        pp.pprint('(!!!) Retrying in 3 seconds...')
+        time.sleep(3)
+        pp.pprint(f"(!!!) Retrying to get and save {iteration} time...")
+        self.save_resource(url, save_path, mime, iteration=iteration + 1)
 
   def save_item(self, item, version, save_path):
     typename = item.get('__typename')
