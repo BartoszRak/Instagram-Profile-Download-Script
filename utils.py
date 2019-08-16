@@ -1,6 +1,7 @@
 # libraries
 import os
 import numpy
+import json
 import urllib
 import cv2
 import pprint
@@ -30,3 +31,9 @@ def get_image_from_url(url):
   image = skimage.io.imread(url)
   rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
   return rgb_image
+
+def read_config(path):
+  file = open(path, 'r')
+  data = file.read()
+  obj = json.loads(data)
+  return obj

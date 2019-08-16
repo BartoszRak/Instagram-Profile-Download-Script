@@ -17,13 +17,18 @@ class Scrapper:
   __posts = []
   __tagged_posts = []
   __paths = None
-
-  def __init__(self, user_setup):
+  
+  def __init__(self, user_setup, config):
     self.__user_setup = user_setup
+    self.__config = config
 
   @property
   def user_setup(self):
     return self.__user_setup
+
+  @property
+  def config(self):
+    return self.__config
 
   def prepare_directories(self):
     relative_base_path = 'results'
@@ -100,7 +105,7 @@ class Scrapper:
 
   def save_item(self, item, version, save_path):
     typename = item.get('__typename')
-    save_name = f"Resource-{version}"
+    save_name = f"{self.config.get('basename')}-{version}"
 
     if typename == "GraphImage":
       mime = "jpg"
